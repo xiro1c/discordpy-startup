@@ -1,21 +1,33 @@
-from discord.ext import commands
-import os
-import traceback
+import discord
+import random
+import re
 
-bot = commands.Bot(command_prefix='/')
-token = os.environ['DISCORD_BOT_TOKEN']
+client = discord.Client()
 
+@client.event
+async def on_ready():
+    print('Logged in as')
+    print(client.user.name)
+    print(client.user.id)
+    print('------')
 
-@bot.event
-async def on_command_error(ctx, error):
-    orig_error = getattr(error, "original", error)
-    error_msg = ''.join(traceback.TracebackException.from_exception(orig_error).format())
-    await ctx.send(error_msg)
+@client.event
+async def on_message(message):
+    powerword=open("./powerwordlist.txt").readlines()
+    # 「**」で始まるか調べる
+    if message.content.startswith("/pw"):
+        # 送り主がBotだった場合反応したくないので
+        if client.user != message.author:
+            i = random.randrange(0,len(powerword))
+            # メッセージを書きます
+            m = powerword[i]
+            # メッセージが送られてきたチャンネルへメッセージを送ります
+            await message.channel.send(m)
 
+    if message.content.startswith("/pwa"):
+        if client.user !=message.author:
+            s = "\n" + message.content.replace("/pwa ","",1).replace("/pwa　","",1).replace("/pwa","",1)
+            with open("./powerwordlist.txt","a") as plist:
+                print(s,file=plist,end="")
 
-@bot.command()
-async def ping(ctx):
-    await ctx.send('pong')
-
-
-bot.run(token)
+client.run("NjU0NzE5MjgyOTA2NjYwOTE0.XfJo7w.iikMg8xasoEtitkX5gDwozuGvRs")
